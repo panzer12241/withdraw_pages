@@ -70,6 +70,11 @@ class WithdrawController extends Controller
         ]);
 
         $withdraw = Withdraw::on($request->connection)->findOrFail($request->id);
+
+        if (in_array($withdraw->status, ['สำเร็จ', 'ยกเลิก'])) {
+            return response()->json(['message' => 'สถานะรายการ ' . $withdraw->status . ' ไปแล้ว'], 400);
+        }
+
         $withdraw->update([
             'status' => 'รอโอนเงิน',
             'message' => null,
@@ -94,6 +99,7 @@ class WithdrawController extends Controller
         ]);
 
         $withdraw = Withdraw::on($request->connection)->findOrFail($request->id);
+
         $withdraw->update([
             'status' => 'สำเร็จ',
             'message' => 'โอนสำเร็จโดย กดถอนมือ',

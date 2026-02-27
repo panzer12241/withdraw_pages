@@ -1,0 +1,13 @@
+php artisan make:seeder UsersTableSeeder
+php artisan make:model Lib --migration
+php artisan make:controller API/Admin/WithdrawTranferController --resource
+php artisan make:request UserStoreRequest
+php artisan make:job ProcessPodcast
+php artisan make:command SendEmails
+php artisan make:middleware EnsureTokenIsValid
+
+docker compose restart
+docker exec -it html_php_1 bash
+service supervisor start
+
+docker compose -f docker-compose-pro.yml up --build

@@ -14,7 +14,7 @@ return [
     | the connection which will be utilized unless another connection
     | is explicitly specified when you execute a query / statement.
     |
-    */
+     */
 
     'default' => env('DB_CONNECTION', 'sqlite'),
 
@@ -27,7 +27,7 @@ return [
     | An example configuration is provided for each database system which
     | is supported by Laravel. You're free to add / remove connections.
     |
-    */
+     */
 
     'connections' => [
 
@@ -113,6 +113,83 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'tbs' => [
+            'read' => [
+                'host' => [
+                    env('DB_HOST_TBS_READ', 'forge'),
+                    env('DB_HOST_TBS_READ2', 'forge'),
+                ],
+            ],
+            'write' => [
+                'host' => [
+                    env('DB_HOST_TBS', 'forge'),
+                ],
+            ],
+            'driver' => 'pgsql',
+            'sticky' => true,
+            'url' => env('DATABASE_URL'),
+            'port' => env('DB_PORT_TBS', '5432'),
+            'database' => env('DB_DATABASE_TBS', 'forge'),
+            'username' => env('DB_USERNAME_TBS', 'forge'),
+            'password' => env('DB_PASSWORD_TBS', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+            'application_name' => env('APP_NAME', 'laravel'),
+        ],
+
+        'gclub' => [
+            'read' => [
+                'host' => [
+                    env('DB_HOST_GCLUB_READ', 'forge'),
+                ],
+            ],
+            'write' => [
+                'host' => [
+                    env('DB_HOST_GCLUB', 'forge'),
+                ],
+            ],
+            'driver' => 'pgsql',
+            'sticky' => true,
+            'url' => env('DATABASE_URL'),
+            'port' => env('DB_PORT_GCLUB', '5432'),
+            'database' => env('DB_DATABASE_GCLUB', 'forge'),
+            'username' => env('DB_USERNAME_GCLUB', 'forge'),
+            'password' => env('DB_PASSWORD_GCLUB', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
+        'ufa' => [
+            'read' => [
+                'host' => [
+                    env('DB_HOST_UFA_READ', 'forge'),
+                ],
+            ],
+            'write' => [
+                'host' => [
+                    env('DB_HOST_UFA', 'forge'),
+                ],
+            ],
+            'driver' => 'pgsql',
+            'sticky' => true,
+            'url' => env('DATABASE_URL'),
+            'port' => env('DB_PORT_UFA', '5432'),
+            'database' => env('DB_DATABASE_UFA', 'forge'),
+            'username' => env('DB_USERNAME_UFA', 'forge'),
+            'password' => env('DB_PASSWORD_UFA', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
     ],
 
     /*
@@ -124,7 +201,7 @@ return [
     | your application. Using this information, we can determine which of
     | the migrations on disk haven't actually been run on the database.
     |
-    */
+     */
 
     'migrations' => [
         'table' => 'migrations',
@@ -140,7 +217,7 @@ return [
     | provides a richer body of commands than a typical key-value system
     | such as Memcached. You may define your connection settings here.
     |
-    */
+     */
 
     'redis' => [
 
@@ -148,7 +225,7 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
-            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-database-'),
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

@@ -11,6 +11,21 @@
             <button @click="fetchData" class="ml-auto underline hover:no-underline">ลองใหม่</button>
         </div>
 
+        <!-- Refresh bar -->
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-xs text-gray-400">อัพเดทอัตโนมัติทุก 10 วินาที</span>
+            <button
+                @click="fetchData"
+                :disabled="loading"
+                class="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition disabled:opacity-50"
+            >
+                <svg :class="['w-4 h-4 transition-transform duration-500', refreshing ? 'animate-spin' : '']" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+
         <!-- Loading skeleton -->
         <template v-if="loading">
             <div v-for="n in 2" :key="n" class="animate-pulse bg-white rounded-2xl border border-gray-200 h-48 mb-6"></div>
@@ -253,11 +268,13 @@ const loading      = ref(true);
 const error        = ref(null);
 const actionLoading = ref(null);
 const copiedId     = ref(null);
+const refreshing   = ref(false);
 let   pollTimer    = null;
 
-const POLL_INTERVAL = 30_000;
+const POLL_INTERVAL = 10_000;
 
 async function fetchData() {
+    refreshing.value = true;
     try {
         const response = await axios.get('/api/withdraw/data');
         // If redirected to login page (session expired), response is HTML not JSON
@@ -276,6 +293,7 @@ async function fetchData() {
         error.value = 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง';
     } finally {
         loading.value = false;
+        refreshing.value = false;
     }
 }
 

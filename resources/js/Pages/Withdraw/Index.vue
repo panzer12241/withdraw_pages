@@ -208,7 +208,7 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3.5 text-center whitespace-nowrap">
-                                    <button @click="handleCancel(item)"
+                                    <button @click="handleCancel(item, 'auto')"
                                         :disabled="actionLoading === item.id"
                                         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-not-allowed transition">
                                         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -244,6 +244,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'; // computed used fo
 import { Head } from '@inertiajs/vue3';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Swal from 'sweetalert2';
 
 // ───── Data ─────
 const pendingItems = ref([]);
@@ -304,39 +305,82 @@ function copyToClipboard(item) {
 }
 
 async function handleAutoWithdraw(item) {
-    if (!confirm(`ยืนยันถอนออโต้ #${item.id} \n${item.name} \n\u0e08ำนวน ฿${formatMoney(item.amount)} ?`)) return;
+    const result = await Swal.fire({
+        title: 'ยืนยันถอนออโต้',
+        html: `<div class="text-sm text-left space-y-1">
+            <div><span class="font-semibold">#${item.id}</span> &nbsp;${item.prefix} / ${item.connection}</div>
+            <div>${item.name}</div>
+            <div class="font-semibold text-blue-600">฿${formatMoney(item.amount)}</div>
+        </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ถอนออโต้',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#2563eb',
+    });
+    if (!result.isConfirmed) return;
     actionLoading.value = item.id;
     try {
-        await axios.post('/api/withdraw/auto', { id: item.id });
+        await axios.post('/api/withdraw/auto', { id: item.id, connection: item.connection, prefix: item.prefix });
         await fetchData();
+        Swal.fire({ title: 'ส่งถอนออโต้เรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false });
     } catch (e) {
-        alert(e.response?.data?.message || 'เกิดข้อผิดพลาด');
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: e.response?.data?.message || '', icon: 'error' });
     } finally {
         actionLoading.value = null;
     }
 }
 
 async function handleManualWithdraw(item) {
-    if (!confirm(`ยืนยันถอนมือ #${item.id} \n${item.name} \n\u0e08ำนวน ฿${formatMoney(item.amount)} ?`)) return;
+    const result = await Swal.fire({
+        title: 'ยืนยันปรับสถานะสำเร็จ',
+        html: `<div class="text-sm text-left space-y-1">
+            <div><span class="font-semibold">#${item.id}</span> &nbsp;${item.prefix} / ${item.connection}</div>
+            <div>${item.name}</div>
+            <div class="font-semibold text-green-600">฿${formatMoney(item.amount)}</div>
+        </div>`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'ปรับสถานะสำเร็จ',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#16a34a',
+    });
+    if (!result.isConfirmed) return;
     actionLoading.value = item.id;
     try {
-        await axios.post('/api/withdraw/manual', { id: item.id });
+        await axios.post('/api/withdraw/manual', { id: item.id, connection: item.connection, prefix: item.prefix });
         await fetchData();
+        Swal.fire({ title: 'ปรับสถานะสำเร็จเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false });
     } catch (e) {
-        alert(e.response?.data?.message || 'เกิดข้อผิดพลาด');
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: e.response?.data?.message || '', icon: 'error' });
     } finally {
         actionLoading.value = null;
     }
 }
 
-async function handleCancel(item) {
-    if (!confirm(`ยืนยันยกเลิกรายการ #${item.id} \n${item.name} \n\u0e08ำนวน ฿${formatMoney(item.amount)} ?`)) return;
+async function handleCancel(item, section = 'pending') {
+    const isPending = section !== 'auto';
+    const result = await Swal.fire({
+        title: isPending ? 'ยืนยันยกเลิกรายการ' : 'ยืนยันยกเลิก (ส่งกลับรอตรวจสอบ)',
+        html: `<div class="text-sm text-left space-y-1">
+            <div><span class="font-semibold">#${item.id}</span> &nbsp;${item.prefix} / ${item.connection}</div>
+            <div>${item.name}</div>
+            <div class="font-semibold text-red-600">฿${formatMoney(item.amount)}</div>
+        </div>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: isPending ? 'ยกเลิกรายการ' : 'ส่งกลับรอตรวจสอบ',
+        cancelButtonText: 'ปิด',
+        confirmButtonColor: '#dc2626',
+    });
+    if (!result.isConfirmed) return;
     actionLoading.value = item.id;
     try {
-        await axios.post('/api/withdraw/cancel', { id: item.id });
+        await axios.post('/api/withdraw/cancel', { id: item.id, connection: item.connection, prefix: item.prefix, section });
         await fetchData();
+        Swal.fire({ title: isPending ? 'ยกเลิกรายการเรียบร้อย' : 'ส่งกลับรอตรวจสอบเรียบร้อย', icon: 'success', timer: 1500, showConfirmButton: false });
     } catch (e) {
-        alert(e.response?.data?.message || 'เกิดข้อผิดพลาด');
+        Swal.fire({ title: 'เกิดข้อผิดพลาด', text: e.response?.data?.message || '', icon: 'error' });
     } finally {
         actionLoading.value = null;
     }

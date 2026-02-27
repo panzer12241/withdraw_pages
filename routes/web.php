@@ -25,4 +25,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->group(function () {
     Route::get('/withdraw', [WithdrawController::class, 'index'])->name('withdraw.index');
     Route::get('/api/withdraw/data', [WithdrawController::class, 'api'])->name('withdraw.api');
+    Route::post('/api/withdraw/auto', [WithdrawController::class, 'autoWithdraw'])->name('withdraw.auto');
+    Route::post('/api/withdraw/manual', [WithdrawController::class, 'manualWithdraw'])->name('withdraw.manual');
+    Route::post('/api/withdraw/cancel', [WithdrawController::class, 'cancelWithdraw'])->name('withdraw.cancel');
 });

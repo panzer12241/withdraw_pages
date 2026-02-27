@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Withdraw;
+use Auth;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -17,6 +19,7 @@ class WithdrawController extends Controller
 
     public function api()
     {
+
         $connections = $this->getPrefixs();
         $withdraws = [];
 
@@ -56,5 +59,78 @@ class WithdrawController extends Controller
             'pendingItems' => $pendingItems->values(),
             'autoItems' => $autoItems->values(),
         ]);
+    }
+
+    public function autoWithdraw(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'connection' => 'required|string',
+            'prefix' => 'required|string',
+        ]);
+
+        $withdraw = Withdraw::on($request->connection)->findOrFail($request->id);
+        $withdraw->update([
+            'status' => 'รอโอนเงิน',
+            'message' => null,
+            'user_id' => Auth::id(),
+            'user_data' => [
+                'username' => Auth::user()->username,
+                'name' => Auth::user()->name,
+                'ip' => request()->ip(),
+                'last_time_login' => null,
+            ],
+        ]);
+
+        return response()->json(['message' => 'ส่งถอนออโต้เรียบร้อย']);
+    }
+
+    public function manualWithdraw(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'connection' => 'required|string',
+            'prefix' => 'required|string',
+        ]);
+
+        $withdraw = Withdraw::on($request->connection)->findOrFail($request->id);
+        $withdraw->update([
+            'status' => 'สำเร็จ',
+            'message' => 'โอนสำเร็จโดย กดถอนมือ',
+            'tranfer_by' => 'โอนสำเร็จโดย กดถอนมือ',
+            'bank_id' => null,
+            'bank_data' => null,
+            'user_id' => Auth::id(),
+            'user_data' => [
+                'username' => Auth::user()->username,
+                'name' => Auth::user()->name,
+                'ip' => request()->ip(),
+                'last_time_login' => null,
+            ],
+        ]);
+
+        return response()->json(['message' => 'ปรับสถานะสำเร็จเรียบร้อย']);
+    }
+
+    public function cancelWithdraw(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'connection' => 'required|string',
+            'prefix' => 'required|string',
+            'section' => 'nullable|string',
+        ]);
+
+        $withdraw = Withdraw::on($request->connection)->findOrFail($request->id);
+
+        // ยกเลิกจาก section auto → ส่งกลับไปรอตรวจสอบ
+        $newStatus = $request->section === 'auto' ? 'รอตรวจสอบ' : 'ยกเลิก';
+        $withdraw->update(['status' => $newStatus]);
+
+        $message = $request->section === 'auto'
+        ? 'ส่งกลับรอตรวจสอบเรียบร้อย'
+        : 'ยกเลิกรายการเรียบร้อย';
+
+        return response()->json(['message' => $message]);
     }
 }

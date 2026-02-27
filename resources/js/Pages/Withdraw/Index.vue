@@ -316,10 +316,26 @@ function copyToClipboard(item) {
         `ชื่อบัญชี: ${item.name ?? ''}`,
         `จำนวนเงิน: ${formatMoney(item.amount)}`,
     ];
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    const text = lines.join('\n');
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            copiedId.value = item.id;
+            setTimeout(() => { copiedId.value = null; }, 2000);
+        });
+    } else {
+        // Fallback for HTTP (non-secure context)
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
         copiedId.value = item.id;
         setTimeout(() => { copiedId.value = null; }, 2000);
-    });
+    }
 }
 
 async function handleAutoWithdraw(item) {

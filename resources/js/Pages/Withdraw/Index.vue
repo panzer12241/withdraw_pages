@@ -320,6 +320,7 @@ async function handleAutoWithdraw(item) {
     });
     if (!result.isConfirmed) return;
     actionLoading.value = item.id;
+    Swal.fire({ title: 'กำลังดำเนินการ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
         await axios.post('/api/withdraw/auto', { id: item.id, connection: item.connection, prefix: item.prefix });
         await fetchData();
@@ -347,6 +348,7 @@ async function handleManualWithdraw(item) {
     });
     if (!result.isConfirmed) return;
     actionLoading.value = item.id;
+    Swal.fire({ title: 'กำลังดำเนินการ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
         await axios.post('/api/withdraw/manual', { id: item.id, connection: item.connection, prefix: item.prefix });
         await fetchData();
@@ -375,6 +377,7 @@ async function handleCancel(item, section = 'pending') {
     });
     if (!result.isConfirmed) return;
     actionLoading.value = item.id;
+    Swal.fire({ title: 'กำลังดำเนินการ...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
         await axios.post('/api/withdraw/cancel', { id: item.id, connection: item.connection, prefix: item.prefix, section });
         await fetchData();

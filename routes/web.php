@@ -24,5 +24,4 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 // ----- Withdraw Routes (require auth) -----
 Route::middleware('auth')->group(function () {
     Route::get('/withdraw', [WithdrawController::class, 'index'])->name('withdraw.index');
-    Route::post('/withdraw', [WithdrawController::class, 'store'])->name('withdraw.store');
 });

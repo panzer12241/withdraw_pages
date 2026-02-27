@@ -10,7 +10,7 @@ abstract class Controller
             [
                 'connection' => 'tbs',
                 'prefixs' => [
-                    'SPIN9', 'BA89', 'ACE333', 'JOKER79', 'THOR99', 'ALL89', 'JOKER123CLUB', 'BMX', 'ACE333AUTO', 'SUPERSLOTGO',
+                    'SPIN9', 'BA89', 'ACE333', 'JOKER79', 'THOR99', 'ALL89', 'JOKER123CLUB', 'BMX', 'ACE333AUTO', 'SUPERSLOTGO', 'MAMMOS', 'LED333',
                 ],
             ],
             [

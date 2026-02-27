@@ -2,29 +2,59 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Withdraw;
+use Carbon\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class WithdrawController extends Controller
 {
+
     public function index(): Response
     {
-        // TODO: Replace mock data with real DB queries
-        // e.g. WithdrawTransaction::where('status', 'pending')->get()
-        $pendingItems = [
-            ['id' => 1001, 'date' => '27 ก.พ. 2569 09:12', 'name' => 'สมชาย ใจดี', 'bank' => 'KBANK', 'account' => '012-3-45678-9', 'amount' => 2500.00],
-            ['id' => 1002, 'date' => '27 ก.พ. 2569 10:05', 'name' => 'นภา รักสงบ', 'bank' => 'SCB', 'account' => '123-4-56789-0', 'amount' => 1000.00],
-            ['id' => 1003, 'date' => '27 ก.พ. 2569 11:30', 'name' => 'วิชัย มีทรัพย์', 'bank' => 'BBL', 'account' => '234-5-67890-1', 'amount' => 5000.00],
-        ];
+        return Inertia::render('Withdraw/Index');
+    }
 
-        $autoItems = [
-            ['id' => 1004, 'date' => '27 ก.พ. 2569 08:00', 'name' => 'ประภา สุขสันต์', 'bank' => 'KTB', 'account' => '345-6-78901-2', 'amount' => 3200.00],
-            ['id' => 1005, 'date' => '27 ก.พ. 2569 08:45', 'name' => 'อนันต์ ดีเลิศ', 'bank' => 'BAY', 'account' => '456-7-89012-3', 'amount' => 750.00],
-        ];
+    public function api()
+    {
+        $connections = $this->getPrefixs();
+        $withdraws = [];
 
-        return Inertia::render('Withdraw/Index', [
-            'pendingItems' => $pendingItems,
-            'autoItems' => $autoItems,
+        foreach ($connections as $connection) {
+            $withdraws[$connection['connection']] = Withdraw::on($connection['connection'])
+                ->whereBetween('created_at', [Carbon::now()->subDays(2)->startOfDay(), Carbon::now()->endOfDay()])
+                ->whereIn('prefix', $connection['prefixs'])
+                ->whereNotIn('status', ['สำเร็จ', 'ยกเลิก'])
+                ->select('id', 'prefix', 'amount', 'customer_data', 'status', 'message', 'created_at')
+                ->get()
+                ->map(fn($item) => [
+                    'id' => $item->id,
+                    'connection' => $connection['connection'],
+                    'prefix' => $item->prefix,
+                    'name' => $item->customer_data['name'] ?? null,
+                    'account_number' => $item->customer_data['account_number'] ?? null,
+                    'bank_name_eng' => $item->customer_data['bank_name_eng'] ?? null,
+                    'bank_name_th' => $item->customer_data['bank_name_th'] ?? null,
+                    'amount' => $item->amount,
+                    'status' => $item->status,
+                    'message' => $item->message,
+                    'created_at' => $item->created_at,
+                ]);
+        }
+
+        // Flatten all connection groups into one collection
+        $allItems = collect($withdraws)->collapse();
+
+        // status ที่ต้องตรวจสอบด้วยมือ → Section 1
+        $pendingStatuses = ['รอตรวจสอบ', 'ผิดพลาด'];
+
+        [$pendingItems, $autoItems] = $allItems->partition(
+            fn($item) => in_array($item['status'], $pendingStatuses)
+        );
+
+        return response()->json([
+            'pendingItems' => $pendingItems->values(),
+            'autoItems' => $autoItems->values(),
         ]);
     }
 }

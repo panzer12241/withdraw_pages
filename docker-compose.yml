@@ -30,6 +30,23 @@ services:
       - withdraw_net
     depends_on:
       - app
+      - reverb
+
+  reverb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: withdraw_reverb
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+    volumes:
+      - storage_data:/var/www/html/storage
+    networks:
+      - withdraw_net
+    command: ["php", "/var/www/html/artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
 
 volumes:
   storage_data:

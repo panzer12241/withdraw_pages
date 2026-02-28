@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\WithdrawStatusUpdated;
 use App\Models\Withdraw;
 use Auth;
 use Carbon\Carbon;
@@ -87,6 +88,8 @@ class WithdrawController extends Controller
             ],
         ]);
 
+        broadcast(new WithdrawStatusUpdated())->toOthers();
+
         return response()->json(['message' => 'ส่งถอนออโต้เรียบร้อย']);
     }
 
@@ -115,6 +118,8 @@ class WithdrawController extends Controller
             ],
         ]);
 
+        broadcast(new WithdrawStatusUpdated())->toOthers();
+
         return response()->json(['message' => 'ปรับสถานะสำเร็จเรียบร้อย']);
     }
 
@@ -132,6 +137,8 @@ class WithdrawController extends Controller
         // ยกเลิกจาก section auto → ส่งกลับไปรอตรวจสอบ
         $newStatus = $request->section === 'auto' ? 'รอตรวจสอบ' : 'ยกเลิก';
         $withdraw->update(['status' => $newStatus]);
+
+        broadcast(new WithdrawStatusUpdated())->toOthers();
 
         $message = $request->section === 'auto'
         ? 'ส่งกลับรอตรวจสอบเรียบร้อย'

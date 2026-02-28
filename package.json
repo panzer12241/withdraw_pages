@@ -18,6 +18,8 @@
         "@inertiajs/core": "^2.3.17",
         "@inertiajs/vue3": "^2.3.17",
         "@vitejs/plugin-vue": "^6.0.4",
+        "laravel-echo": "^2.3.0",
+        "pusher-js": "^8.4.0",
         "sweetalert2": "^11.26.20",
         "vue": "^3.5.29"
     }

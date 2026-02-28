@@ -300,9 +300,18 @@ async function fetchData() {
 onMounted(() => {
     fetchData();
     pollTimer = setInterval(fetchData, POLL_INTERVAL);
+
+    // Real-time: listen for status changes from other users via WebSocket
+    window.Echo.channel('withdraw')
+        .listen('.status.updated', () => {
+            fetchData();
+        });
 });
 
-onUnmounted(() => clearInterval(pollTimer));
+onUnmounted(() => {
+    clearInterval(pollTimer);
+    window.Echo.leaveChannel('withdraw');
+});
 
 // ───── Actions ─────
 function copyToClipboard(item) {

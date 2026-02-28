@@ -11,6 +11,7 @@ RUN bun install --frozen-lockfile
 COPY vite.config.js ./
 COPY resources/ resources/
 COPY public/ public/
+COPY .env ./
 
 RUN bun run build
 
